@@ -1,0 +1,29 @@
+{
+  "name": "auth-system-dual-db",
+  "version": "1.0.0",
+  "description": "fullstack authentication project",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shreya-Wani/Auth-System-Dual-DB.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Shreya-Wani/Auth-System-Dual-DB/issues"
+  },
+  "homepage": "https://github.com/Shreya-Wani/Auth-System-Dual-DB#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^9.1.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
