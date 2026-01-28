@@ -1,7 +1,6 @@
 import User from "../model/User.model.js";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-import bcrypt from "bcrypt";
 
 const registerUser = async (req, res) => {
     //get data
@@ -24,12 +23,10 @@ const registerUser = async (req, res) => {
         }
 
         //create user in database
-        const hashedPassword = await bcrypt.hash(password, 10);
-
         const user = await User.create({
             name,
             email,
-            password: hashedPassword
+            password
         })
 
         if (!user) {
@@ -77,6 +74,53 @@ const registerUser = async (req, res) => {
     }
 };
 
+const verifyUser = async (req, res) => {
+  try {
+    // get token from url
+    const { token } = req.params;
 
+    // validate token
+    if (!token) {
+      return res.status(400).json({
+        message: "Invalid or missing token",
+        success: false
+      });
+    }
 
-export { registerUser };
+    // find user based on token
+    const user = await User.findOne({
+      verificationToken: token
+    });
+
+    // if user not found
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired token",
+        success: false
+      });
+    }
+
+    // mark user as verified
+    user.isVerified = true;
+
+    // remove verification token
+    user.verificationToken = undefined;
+
+    // save user
+    await user.save();
+
+    // success response
+    return res.status(200).json({
+      message: "User verified successfully",
+      success: true
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Error verifying user",
+      success: false
+    });
+  }
+};
+
+export { registerUser, verifyUser };
