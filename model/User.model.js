@@ -32,17 +32,13 @@ const userSchema = new mongoose.Schema(
     resetPasswordToken: String,
     resetPasswordExpires: Date
   },
-  {
-    timestamps: true
-  }
+  { timestamps: true }
 );
 
-// hash password before saving
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-
+// ✅ CORRECT pre-save hook
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 const User = mongoose.model("User", userSchema);
