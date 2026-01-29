@@ -5,6 +5,7 @@ import db from "./utils/db.js";
 
 //import all routes
 import userRoutes from "./routes/User.routes.js";
+import cookieParser from "cookie-parser";
 
 dotenv.config()
 
@@ -21,6 +22,7 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}))
+app.use(cookieParser());
 
 const port = process.env.PORT || 3000;
 
