@@ -3,7 +3,6 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import cookieParser from "cookie-parser";
 
 
 const registerUser = async (req, res) => {
@@ -181,7 +180,7 @@ const loginUser = async (req, res) => {
 
 const getMe = async (req, res) => {
     try {
-
+        
     } catch (error) {
 
     }
