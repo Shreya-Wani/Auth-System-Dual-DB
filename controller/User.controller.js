@@ -180,15 +180,28 @@ const loginUser = async (req, res) => {
 
 const getMe = async (req, res) => {
     try {
-        
-    } catch (error) {
+        console.log("reached at profile level");
 
+        res.status(200).json({
+            success: true,
+            user: req.user
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch profile"
+        });
     }
 }
 
 const logoutUser = async (req, res) => {
     try {
-
+        res.cookie('token', '', {});
+        res.status(200).json({
+            success: true,
+            message: "Logout Successfully"
+        })
     } catch (error) {
 
     }
@@ -196,7 +209,7 @@ const logoutUser = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
     try {
-
+        
     } catch (error) {
 
     }
