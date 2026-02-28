@@ -115,6 +115,74 @@ const verifyUser = async (req, res) => {
     }
 };
 
+const resendVerification = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required"
+            });
+        }
+
+        const user = await User.findOne({ email });
+
+        // Do not reveal if user exists (security practice)
+        if (!user) {
+            return res.status(200).json({
+                success: true,
+                message: "If this email exists, a verification link has been sent."
+            });
+        }
+
+        // If already verified
+        if (user.isVerified) {
+            return res.status(400).json({
+                success: false,
+                message: "User is already verified."
+            });
+        }
+
+        // Generate new verification token
+        const newToken = crypto.randomBytes(32).toString("hex");
+
+        user.verificationToken = newToken;
+        await user.save();
+
+        const transporter = nodemailer.createTransport({
+            host: process.env.MAILTRAP_HOST,
+            port: process.env.MAILTRAP_PORT,
+            auth: {
+                user: process.env.MAILTRAP_USERNAME,
+                pass: process.env.MAILTRAP_PASSWORD
+            }
+        });
+
+        const verifyURL = `${process.env.BASE_URL}/api/v1/users/verify/${newToken}`;
+
+        await transporter.sendMail({
+            from: process.env.MAILTRAP_SENDERMAIL,
+            to: user.email,
+            subject: "Resend Email Verification",
+            text: `Verify your account using this link: ${verifyURL}`
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Verification email resent successfully."
+        });
+
+    } catch (error) {
+        console.error("Resend Verification Error:", error.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Resend verification failed"
+        });
+    }
+};
+
 const loginUser = async (req, res) => {
     //get data
     const { email, password } = req.body
@@ -313,4 +381,4 @@ const resetPassword = async (req, res) => {
         });
     }
 }
-export { registerUser, verifyUser, loginUser, getMe, logoutUser, forgotPassword, resetPassword };
+export { registerUser, verifyUser, loginUser, getMe, logoutUser, forgotPassword, resetPassword, resendVerification };

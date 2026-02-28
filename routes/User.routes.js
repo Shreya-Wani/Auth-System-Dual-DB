@@ -1,12 +1,13 @@
 import express from "express";
 import { protect } from "../middleware/auth.middleware.js";
-import { loginUser, registerUser, verifyUser, getMe, logoutUser, forgotPassword, resetPassword } from "../controller/User.controller.js";
+import { loginUser, registerUser, verifyUser, getMe, logoutUser, forgotPassword, resetPassword, resendVerification } from "../controller/User.controller.js";
 
 const router = express.Router();
 
 // Public Routes
 router.post("/register", registerUser);
 router.get("/verify/:token", verifyUser);
+router.post("/resend-verification", resendVerification);
 router.post("/login", loginUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset/:token", resetPassword);
