@@ -203,78 +203,114 @@ const logoutUser = async (req, res) => {
             message: "Logout Successfully"
         })
     } catch (error) {
-
+        return res.status(500).json({
+            success: false,
+            message: "Logout failed. Please try again."
+        });
     }
 }
 
 const forgotPassword = async (req, res) => {
-    const forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
+    try {
+        const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({
-        success: false,
-        message: "Email is required"
-      });
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Email is required"
+            });
+        }
+
+        const user = await User.findOne({ email });
+
+        // Don't reveal whether user exists (security best practice)
+        if (!user) {
+            return res.status(200).json({
+                success: true,
+                message: "If this email exists, a reset link has been sent."
+            });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString("hex");
+
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+        await user.save();
+
+        // Send reset email
+        const transporter = nodemailer.createTransport({
+            host: process.env.MAILTRAP_HOST,
+            port: process.env.MAILTRAP_PORT,
+            auth: {
+                user: process.env.MAILTRAP_USERNAME,
+                pass: process.env.MAILTRAP_PASSWORD
+            }
+        });
+
+        const resetURL = `${process.env.BASE_URL}/api/v1/users/reset/${resetToken}`;
+
+        await transporter.sendMail({
+            from: process.env.MAILTRAP_SENDERMAIL,
+            to: user.email,
+            subject: "Password Reset",
+            text: `Reset your password using this link: ${resetURL}`
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Reset password link sent to email."
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Forgot password failed"
+        });
     }
-
-    const user = await User.findOne({ email });
-
-    // Don't reveal whether user exists (security best practice)
-    if (!user) {
-      return res.status(200).json({
-        success: true,
-        message: "If this email exists, a reset link has been sent."
-      });
-    }
-
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
-
-    user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
-
-    await user.save();
-
-    // Send reset email
-    const transporter = nodemailer.createTransport({
-      host: process.env.MAILTRAP_HOST,
-      port: process.env.MAILTRAP_PORT,
-      auth: {
-        user: process.env.MAILTRAP_USERNAME,
-        pass: process.env.MAILTRAP_PASSWORD
-      }
-    });
-
-    const resetURL = `${process.env.BASE_URL}/api/v1/users/reset/${resetToken}`;
-
-    await transporter.sendMail({
-      from: process.env.MAILTRAP_SENDERMAIL,
-      to: user.email,
-      subject: "Password Reset",
-      text: `Reset your password using this link: ${resetURL}`
-    });
-
-    return res.status(200).json({
-      success: true,
-      message: "Reset password link sent to email."
-    });
-
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Forgot password failed"
-    });
-  }
 };
-}
 
 const resetPassword = async (req, res) => {
     try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        if (!token || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Token and new password are required"
+            });
+        }
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired token"
+            });
+        }
+
+        user.password = password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Password reset successful"
+        });
 
     } catch (error) {
-
+        return res.status(500).json({
+            success: false,
+            message: "Reset password failed"
+        });
     }
 }
 export { registerUser, verifyUser, loginUser, getMe, logoutUser, forgotPassword, resetPassword };
