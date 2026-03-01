@@ -1,38 +1,74 @@
-# Auth-System-Dual-DB
+# 🔐 Auth System — MongoDB
 
-A backend authentication system built with Node.js and Express, demonstrating how MongoDB and PostgreSQL (via Prisma) can be used together in a single application.
+A backend authentication REST API built with **Node.js**, **Express 5**, and **MongoDB**.
 
-## 🚀 Features
-- User authentication (signup and login)
-- Secure password hashing
-- Token-based authentication
-- MongoDB integration using Mongoose
-- PostgreSQL integration using Prisma
-- Clean and modular backend code
+## ✨ Features
+
+- User registration with email verification (Nodemailer + Mailtrap)
+- JWT-based login (httpOnly cookie)
+- Forgot & reset password (time-limited token)
+- Protected routes with auth middleware
+- Password hashing (bcrypt pre-save hook)
+- Role-based user model (`user` / `admin`)
 
 ## 🛠️ Tech Stack
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- PostgreSQL
-- Prisma
-- JavaScript
 
-## 🗄️ Database Overview
-- **MongoDB** is used for authentication and user-related data because of its flexibility.
-- **PostgreSQL** is used for structured and relational data with the help of Prisma ORM.
+Node.js · Express 5 · MongoDB · Mongoose · JWT · bcrypt · Nodemailer · Nodemon
 
-This project demonstrates how multiple databases can coexist and be managed within a single backend service.
+## 📁 Project Structure
 
-## 📌 Notes
-- This is a backend-only project.
-- No frontend is implemented yet.
-- Environment variables are stored in a `.env` file which is not included in the repository.
+```
+├── controller/User.controller.js   # Auth logic (register, login, verify, reset…)
+├── middleware/auth.middleware.js    # JWT route protection
+├── model/User.model.js             # Mongoose schema + bcrypt hook
+├── routes/User.routes.js           # Route definitions
+├── utils/db.js                     # MongoDB connection
+└── index.js                        # Entry point
+```
 
-## 🎯 Purpose
-The purpose of this project is to practice backend authentication concepts and understand real-world usage of both NoSQL and SQL databases in one application.
+## ⚙️ Setup
+
+```bash
+git clone https://github.com/Shreya-Wani/auth-system-mongodb.git
+cd auth-system-mongodb
+npm install
+```
+
+Create a `.env` file:
+
+```env
+PORT=3000
+MONGO_URL=your_mongodb_connection_string
+JWT_SECRET=your_secret
+BASE_URL=http://localhost:3000
+MAILTRAP_HOST=smtp.mailtrap.io
+MAILTRAP_PORT=2525
+MAILTRAP_USERNAME=your_username
+MAILTRAP_PASSWORD=your_password
+MAILTRAP_SENDERMAIL=noreply@example.com
+```
+
+Start the server:
+
+```bash
+npm run dev
+```
+
+## 📡 API Endpoints
+
+Base: `/api/v1/users`
+
+| Method | Endpoint               | Auth | Description                |
+| ------ | ---------------------- | ---- | -------------------------- |
+| POST   | `/register`            | ✗    | Register a new user        |
+| GET    | `/verify/:token`       | ✗    | Verify email               |
+| POST   | `/resend-verification` | ✗    | Resend verification email  |
+| POST   | `/login`               | ✗    | Login (sets JWT cookie)    |
+| POST   | `/forgot-password`     | ✗    | Send password reset email  |
+| POST   | `/reset/:token`        | ✗    | Reset password             |
+| GET    | `/profile`             | ✓    | Get current user           |
+| GET    | `/logout`              | ✓    | Logout (clears cookie)     |
 
 ---
 
-⭐ This project is built for learning and improvement.
+> Built with 💙 by [Shreya Wani](https://github.com/Shreya-Wani) — for learning, building, and growing as a developer.
